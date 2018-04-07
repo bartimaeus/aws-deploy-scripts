@@ -1,0 +1,19 @@
+{
+  "name": "aws-deploy-scripts",
+  "version": "1.0.0",
+  "description": "Collection of scripts to deploy ECS services and S3 static websites",
+  "repository": "https://github.com/bartimaeus/aws-deploy-scripts",
+  "author": "Eric Shelley <eric@webdesignbakery.com>",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.2.1",
+    "commander": "^2.15.1",
+    "lodash": "^4.17.5"
+  },
+  "devDependencies": {
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "prettier": "^1.11.1"
+  }
+}
