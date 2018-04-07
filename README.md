@@ -31,20 +31,6 @@ This repository is for my sanity in managing multiple AWS accounts on the same m
         cd switcher
         npm install -g
 
-5. Install **[jq](https://stedolan.github.io/jq/download/)** for parsing JSON responses from AWS CLI
-
-        brew install jq
-
-6. Install the **npm** dependencies
-
-        yarn install
-
-7. *(Optional)* Use an AWS credential management library to switch the **[default]** AWS credentials in your `~/.aws/credentials`. Personally, I'm using [switcher](https://github.com/ivarrian/switcher).
-
-        git clone https://github.com/ivarrian/switcher
-        cd switcher
-        npm install -g
-
 ## S3
 
 Back in the day I used [gulp and grunt scripts](yeoman-s3-example) to sync assets with S3 for a number of static websites I manage.
