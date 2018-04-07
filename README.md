@@ -51,7 +51,7 @@ See this [blog post](https://medium.com/@omgwtfmarc/deploying-create-react-app-t
 
 2. Add a `"deploy"` script to your **package.json** in your main repository with the **accountId**, **bucket**, **distributionId**, **profile**, and **path** set.
 
-    ```json
+    ```diff
     "scripts": {
       "start": "gatsby develop",
       "build": "gatsby build",
@@ -65,7 +65,7 @@ See this [blog post](https://medium.com/@omgwtfmarc/deploying-create-react-app-t
 
     If I'm deploying a `react-create-app` single page app, then I add the following `"prebuild"` script:
 
-    ```json
+    ```diff
     "scripts": {
       "start": "react-scripts start",
     + "prebuild": "rm -fR build/*",
