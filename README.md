@@ -27,7 +27,7 @@ Currently I use `yarn` to run these scripts. I'll include a sample **package.jso
 
 6. Install the **npm** dependencies
 
-        cd aws-deploy-scripts && yarn install && cd ..
+        yarn install
 
 7. *(Optional)* Use an AWS credential management library to switch the **[default]** AWS credentials in your `~/.aws/credentials`. Personally, I'm using [switcher](https://github.com/ivarrian/switcher).
 
@@ -56,7 +56,7 @@ See this [blog post](https://medium.com/@omgwtfmarc/deploying-create-react-app-t
       "start": "gatsby develop",
       "build": "gatsby build",
     + "postbuild": "find public -name '*.map' -type f -delete",
-    + "deploy": "./aws-deploy-scripts/s3/deploy.sh --account-id 14234234 --bucket www.mysite.com --path public --profile mysite",
+    + "deploy": "aws-s3-deploy --account-id 14234234 --bucket www.mysite.com --path public --profile mysite",
       "test": "echo \"Error: no test specified\" && exit 1"
     },
     ```
@@ -71,7 +71,7 @@ See this [blog post](https://medium.com/@omgwtfmarc/deploying-create-react-app-t
     + "prebuild": "rm -fR build/*",
       "build": "react-scripts build",
     + "postbuild": "find build -name '*.map' -type f -delete",
-    + "deploy": "./aws-deploy-scripts/s3/deploy.sh --account-id 14234234 --bucket www.mysite.com --path build --profile mysite",
+    + "deploy": "aws-s3-deploy --account-id 14234234 --bucket www.mysite.com --path build --profile mysite",
       "test": "react-scripts test --env=jsdom",
       "eject": "react-scripts eject"
     },
@@ -84,7 +84,7 @@ See this [blog post](https://medium.com/@omgwtfmarc/deploying-create-react-app-t
     The S3 deploy script will automatically create an invalidation if the CloudFront distribution id `--distribution-id [distribution id]` is added to the `"deploy"` script.
 
     ```json
-    "deploy": "./aws-deploy-scripts/s3/deploy.sh --account-id 14234234 --bucket www.mysite.com --distribution-id E245GA45256 --path build --profile mysite",
+    "deploy": "aws-s3-deploy --account-id 14234234 --bucket www.mysite.com --distribution-id E245GA45256 --path build --profile mysite",
     ```
 
     > **Security** is important and you should not store any sensitive values in your repository. I personally feel that the **account id**, **bucket name**, and **distribution id** are more helpful to keep in the repository when collaberating with other developers. If anyone feels differently, I'd be interested to get your feedback.

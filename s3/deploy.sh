@@ -2,7 +2,7 @@
 
 # Setup default values for variables
 VERSION="1.0.0"
-NOTIFY="/bin/bash ./aws-deploy-scripts/lib/slack-notify.sh"
+NOTIFY="/bin/bash ./node_modules/aws-deploy-scripts/lib/slack-notify.sh"
 
 AWS_ACCOUNT_ID=""
 AWS_PROFILE=""
