@@ -37,12 +37,13 @@ program
     'Project prefix for tagging the build locally.'
   )
   .option('--push', 'Automatically push the docker image')
+  .option('--noCache', 'Build the docker image fresh and not from cache')
   .parse(process.argv)
 
 const { accountId, push } = program
 
 let gen // Set a variable for our generator
-let { dockerfile, environment, image, prefix } = program
+let { dockerfile, environment, image, noCache, prefix } = program
 let currentAccountId
 let accessKeyId
 let secretAccessKey
@@ -56,6 +57,7 @@ let imageTag
 dockerfile = dockerfile || 'Dockerfile'
 environment = environment || 'staging'
 image = image || 'api'
+noCache = noCache ? '--no-cache' : ''
 prefix = prefix || 'default'
 
 /**
@@ -173,7 +175,7 @@ const createTmpAwsCredentials = () => {
 const buildDockerImage = () => {
   console.log(colors.green('~> Building docker image'))
   repository = `${accountId}.dkr.ecr.us-east-1.amazonaws.com/${environment}/${image}`
-  const buildCmd = `docker build -t ${prefix}/${environment}/${image} --build-arg AWS_ACCESS_KEY_ID=${accessKeyId} --build-arg AWS_SECRET_ACCESS_KEY=${secretAccessKey} --build-arg AWS_SESSION_TOKEN=${sessionToken} --build-arg ENVIRONMENT=${environment} -f ${dockerfile} . --no-cache`
+  const buildCmd = `docker build -t ${prefix}/${environment}/${image} --build-arg AWS_ACCESS_KEY_ID=${accessKeyId} --build-arg AWS_SECRET_ACCESS_KEY=${secretAccessKey} --build-arg AWS_SESSION_TOKEN=${sessionToken} --build-arg ENVIRONMENT=${environment} -f ${dockerfile} ${noCache}`
   console.log(buildCmd)
   shell('docker', [
     'build',
