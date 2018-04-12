@@ -55,16 +55,10 @@ function deploy() {
   aws s3 sync $DEPLOY_PATH s3://$S3_BUCKET --delete --cache-control max-age=31536000,public --profile $AWS_PROFILE
 
   # Update cache for react-create-app's service-worker.js
-  SERVICE_WORKER=$(aws s3 ls s3://$S3_BUCKET/service-worker.js | wc -l)
-  if [[ SERVICE_WORKER == 1 ]]; then
-    aws s3 cp s3://$S3_BUCKET/service-worker.js s3://$S3_BUCKET/service-worker.js --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type application/javascript --acl public-read --profile $AWS_PROFILE
-  fi
+  aws s3 cp s3://$S3_BUCKET/service-worker.js s3://$S3_BUCKET/service-worker.js --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type application/javascript --acl public-read --profile $AWS_PROFILE
 
   # Update cache for index.html
-  INDEX_FILE=$(aws s3 ls s3://$S3_BUCKET/index.html | wc -l)
-  if [[ INDEX_FILE == 1 ]]; then
-    aws s3 cp s3://$S3_BUCKET/index.html s3://$S3_BUCKET/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html --acl public-read --profile $AWS_PROFILE
-  fi
+  aws s3 cp s3://$S3_BUCKET/index.html s3://$S3_BUCKET/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html --acl public-read --profile $AWS_PROFILE
 
   # Create invalidation for cloudfront distribution
   if [[ $DISTRIBUTION_ID != "" ]]; then
