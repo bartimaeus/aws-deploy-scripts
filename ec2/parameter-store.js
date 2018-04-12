@@ -81,7 +81,7 @@ const getParameters = () => {
     // Now read in each key/pair
     console.log(colors.green('\n~> Fetching individual variables...'))
     const keys = JSON.parse(response.Parameter.Value)
-    const interval = 100 // delay api calls;
+    const interval = 500 // delay api calls;
     for (let i = 0; i < keys.length; i += 1) {
       setTimeout(
         () => {
@@ -162,7 +162,7 @@ const putParameters = () => {
       .then(() => {
         // Upload each environment variable
         console.log(colors.green('\n--> Uploading individual variables...'))
-        const interval = 500 // delay api calls by 0.5 seconds;
+        const interval = 1500 // delay api calls by 1.5 seconds;
         for (let i = 0; i < variables.length; i += 1) {
           setTimeout(
             () => {
