@@ -33,6 +33,10 @@ program
     'Key id (or key alias) used by the parameter store to encrypt and decrypt parameters'
   )
   .option(
+    '-l, --location [value]',
+    'Location to write our environment variables (e.g., --location /etc/profile)'
+  )
+  .option(
     '-p, --profile [value]',
     'Project prefix for classifying the build more than just environment.'
   )
@@ -40,7 +44,7 @@ program
 
 program.parse(process.argv)
 
-let { action, debug, environment, key, profile, region } = program
+let { action, debug, environment, key, location, profile, region } = program
 
 /**
  * Set default values in case they were not provided
@@ -49,6 +53,7 @@ action = action || 'get'
 debug = debug || false
 environment = environment || 'staging'
 key = key || 'default'
+location = location || '/etc/profile'
 profile = profile || 'default'
 region = region || 'us-east-1'
 
@@ -101,7 +106,14 @@ const getParameters = () => {
               console.log(
                 `(${i}/${keys.length}) Downloaded ${colors.cyan(keys[i])}`
               )
-              exec(`echo 'export ${keys[i]}=${value}' >> /etc/profile`)
+              // Verify that location exists
+              if (fs.existsSync(location)) {
+                exec(`echo 'export ${keys[i]}=${value}' >> ${location}`)
+              } else {
+                // Create location and write environment variables to file
+                fs.closeSync(fs.openSync(location, 'w'))
+                exec(`echo 'export ${keys[i]}=${value}' >> ${location}`)
+              }
             }
           })
         },
