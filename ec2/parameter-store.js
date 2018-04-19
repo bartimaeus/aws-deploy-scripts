@@ -9,6 +9,7 @@ const colors = require('colors')
 const program = require('commander')
 const { exec } = require('child_process')
 const readline = require('readline')
+const touch = require('touch')
 const fs = require('fs')
 
 /**
@@ -111,7 +112,7 @@ const getParameters = () => {
                 exec(`echo 'export ${keys[i]}=${value}' >> ${location}`)
               } else {
                 // Create location and write environment variables to file
-                fs.closeSync(fs.openSync(location, 'w', '0755'))
+                touch.sync(location)
                 exec(`echo 'export ${keys[i]}=${value}' >> ${location}`)
               }
             }
