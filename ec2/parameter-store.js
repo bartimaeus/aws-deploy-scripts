@@ -107,14 +107,12 @@ const getParameters = () => {
               console.log(
                 `(${i}/${keys.length}) Downloaded ${colors.cyan(keys[i])}`
               )
-              // Verify that location exists
-              if (fs.existsSync(location)) {
-                exec(`echo 'export ${keys[i]}=${value}' >> ${location}`)
-              } else {
-                // Create location and write environment variables to file
+              // Verify that location exists otherwise touch the file
+              if (!fs.existsSync(location)) {
+                console.log(`>> Creating profile.d file '${location}'`)
                 touch.sync(location)
-                exec(`echo 'export ${keys[i]}=${value}' >> ${location}`)
               }
+              exec(`echo 'export ${keys[i]}=${value}' >> ${location}`)
             }
           })
         },
