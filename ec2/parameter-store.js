@@ -34,7 +34,7 @@ program
   )
   .option(
     '-l, --location [value]',
-    'Location to write our environment variables (e.g., --location /etc/profile)'
+    'Location to write our environment variables (e.g., --location /etc/profile.d/env.sh)'
   )
   .option(
     '-p, --profile [value]',
@@ -53,7 +53,7 @@ action = action || 'get'
 debug = debug || false
 environment = environment || 'staging'
 key = key || 'default'
-location = location || '/etc/profile'
+location = location || '/etc/profile.d/env.sh'
 profile = profile || 'default'
 region = region || 'us-east-1'
 
@@ -111,7 +111,7 @@ const getParameters = () => {
                 exec(`echo 'export ${keys[i]}=${value}' >> ${location}`)
               } else {
                 // Create location and write environment variables to file
-                fs.closeSync(fs.openSync(location, 'w'))
+                fs.closeSync(fs.openSync(location, 'wx'))
                 exec(`echo 'export ${keys[i]}=${value}' >> ${location}`)
               }
             }
