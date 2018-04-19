@@ -111,7 +111,7 @@ const getParameters = () => {
                 exec(`echo 'export ${keys[i]}=${value}' >> ${location}`)
               } else {
                 // Create location and write environment variables to file
-                fs.closeSync(fs.openSync(location, 'wx'))
+                fs.closeSync(fs.openSync(location, 'w', '0755'))
                 exec(`echo 'export ${keys[i]}=${value}' >> ${location}`)
               }
             }
