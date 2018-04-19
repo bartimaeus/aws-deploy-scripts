@@ -58,6 +58,8 @@ location = location || '/etc/profile.d/env.sh'
 profile = profile || 'default'
 region = region || 'us-east-1'
 
+console.log('>>> location', location)
+
 // AWS CLI function to call AWS commands
 const aws = (execCommand, execOptions = {}) =>
   new Promise((resolve, reject) => {
