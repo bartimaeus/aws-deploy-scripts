@@ -63,7 +63,7 @@ const aws = (execCommand, execOptions = {}) =>
 const getSecretsFile = () => {
   console.log(
     colors.green(
-      `\n~> Pushing .env.${environment} secrets file to ${bucket}...`
+      `\n~> Fetching .env.${environment} secrets file to ${bucket}...`
     )
   )
   aws(
@@ -81,7 +81,7 @@ const getSecretsFile = () => {
 const putSecretsFile = () => {
   console.log(
     colors.green(
-      `\n~> Fetching .env.${environment} secrets file from ${bucket}...`
+      `\n~> Pushing .env.${environment} secrets file from ${bucket}...`
     )
   )
   aws(
