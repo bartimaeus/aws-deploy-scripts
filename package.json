@@ -1,6 +1,6 @@
 {
   "name": "aws-deploy-scripts",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Collection of scripts to deploy ECS services and S3 static websites",
   "repository": "https://github.com/bartimaeus/aws-deploy-scripts",
   "author": "Eric Shelley <eric@webdesignbakery.com>",
