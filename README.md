@@ -39,6 +39,10 @@ Now, in addition to syncing with S3, I use CloudFront to serve the assets. Becau
 
 See this [blog post](https://medium.com/@omgwtfmarc/deploying-create-react-app-to-s3-or-cloudfront-48dae4ce0af) on how to setup and deploy your React app to Amazon Web Services S3 and CloudFront.
 
+#### Examples
+
+Example `gatsby` and `create-react-app` projects can be found in the `examples` directory.
+
 #### Setup
 
 1. Install **aws-deploy-scripts** to your dev dependencies. I've switched to using yarn for a few reasons. One of my favorite is that I don't have to specify run like I do with npm. `npm run deploy` is now `yarn deploy`.
