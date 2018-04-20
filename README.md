@@ -5,6 +5,14 @@ A collection of scripts I use to deploy ECS services and S3 static websites
 
 This repository is for my sanity in managing multiple AWS accounts on the same machine. I have made the occational mistake of pushing resources to the wrong AWS account. I also want to manage these shared scripts in one place rather than updating each respository individually.
 
+## Scripts
+
+* aws-ecs-build
+* aws-ecs-deploy
+* aws-parameter-store
+* aws-s3-deploy
+* aws-s3-secrets
+
 ## Setup
 
 1. Add **aws-deploy-scripts** to your project
@@ -31,7 +39,7 @@ This repository is for my sanity in managing multiple AWS accounts on the same m
         cd switcher
         npm install -g
 
-## S3
+## S3 Deploy
 
 Back in the day I used [gulp and grunt scripts](yeoman-s3-example) to sync assets with S3 for a number of static websites I manage.
 
@@ -208,3 +216,39 @@ Deploying is pretty straight forward:
     yarn build && yarn deploy
 
 > **NOTE**: You can always add your own script to either run tests or lint your code before you deploy.
+
+
+## S3 Secrets
+
+The script concept comes from [How to Manage Secrets for Amazon EC2 Container Service–Based Applications by Using Amazon S3 and Docker](https://aws.amazon.com/blogs/security/how-to-manage-secrets-for-amazon-ec2-container-service-based-applications-by-using-amazon-s3-and-docker/)
+
+> Once setup run `yarn env-vars` to send your secret file to S3
+
+#### Setup
+
+1. Create an S3 bucket of your choice. My preference is to do `[project]-[environment]-secrets`.
+
+2. Attach either the `bucket-policy.json` or `vpc-only-bucket-policy.json` to the newly created bucket.
+
+3. Install `aws-deploy-scripts` in your project--if not already installed
+
+    yarn add aws-deploy-scripts --dev
+
+4. Add `env-vars` and `get-env-vars` scripts to your `package.json`
+
+    ```json
+    "scripts": {
+      "start": "node index.js",
+      "env-vars": "aws-s3-secrets --action put --environment staging --bucket blog-staging-secrets --profile default",
+      "get-env-vars": "aws-s3-secrets --action get --environment staging --bucket blog-staging-secrets --profile default"
+    },
+    ```
+5. Send your local secrets file to S3 (NOTE: if you used the VPC policy on your s3 bucket, then you'll need to connect to the VPN before you can send your secret file)
+
+    yarn env-vars
+
+6. Testing the file on S3 requires you to download the file
+
+    yarn get-env-vars
+
+  I've added prefix of `s3.` to the file being downloaded so that it doesn't overwrite your original file.

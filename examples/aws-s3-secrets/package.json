@@ -1,0 +1,9 @@
+{
+  "name": "aws-s3-secrets-example",
+  "version": "1.0.0",
+  "description": "Simple script to sync environment files with an encrypted S3 bucket",
+  "scripts": {
+    "env-vars": "aws-s3-secrets --action put --bucket SECRETS_BUCKET_NAME --environment staging --profile AWS_CLI_PROFILE",
+    "get-env-vars": "aws-s3-secrets --action get --bucket SECRETS_BUCKET_NAME --environment staging --profile AWS_CLI_PROFILE"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyUnEncryptedObjectUploads",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::SECRETS_BUCKET_NAME/*",
+      "Condition": {
+        "StringNotEquals": {
+          "s3:x-amz-server-side-encryption": "AES256"
+        }
+      }
+    },
+    {
+      "Sid": " DenyUnEncryptedInflightOperations",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": "arn:aws:s3:::SECRETS_BUCKET_NAME/*",
+      "Condition": {
+        "Bool": {
+          "aws:SecureTransport": false
+        }
+      }
+    },
+    {
+      "Sid": "S3-access-through-specific-VPCE-only",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": "arn:aws:s3:::SECRETS_BUCKET_NAME/*",
+      "Condition": {
+        "StringNotEquals": {
+          "aws:sourceVpce": "VPC_ENDPOINT"
+        }
+      }
+    }
+  ]
+}
