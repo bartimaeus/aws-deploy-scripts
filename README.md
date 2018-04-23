@@ -122,6 +122,7 @@ I setup git to use the **develop** branch for the main branch. All pull requests
             "Effect": "Allow",
             "Action": [
                 "s3:PutObject",
+                "s3:PutObjectAcl",
                 "s3:GetObject",
                 "s3:DeleteObject"
             ],
@@ -172,6 +173,7 @@ Finally, I use the **master** git branch for production. I update the **package.
             "Effect": "Allow",
             "Action": [
                 "s3:PutObject",
+                "s3:PutObjectAcl",
                 "s3:GetObject",
                 "s3:DeleteObject"
             ],
