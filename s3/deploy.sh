@@ -52,7 +52,7 @@ function validateCredentials() {
 # adding it to be sure since I have accidentally deploying using the wrong profile!
 function deploy() {
   # Sync all files in $DEPLOY_PATH and delete those on s3 that are not in the $DEPLOY_PATH
-  aws s3 sync $DEPLOY_PATH s3://$S3_BUCKET --delete --cache-control max-age=31536000,public --profile $AWS_PROFILE
+  aws s3 sync $DEPLOY_PATH s3://$S3_BUCKET --cache-control max-age=31536000,public --profile $AWS_PROFILE
 
   # Update cache for react-create-app's service-worker.js
   aws s3 cp s3://$S3_BUCKET/service-worker.js s3://$S3_BUCKET/service-worker.js --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type application/javascript --acl public-read --profile $AWS_PROFILE
