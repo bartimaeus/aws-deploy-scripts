@@ -48,7 +48,6 @@ let currentAccountId
 let accessKeyId
 let secretAccessKey
 let sessionToken
-let repository
 
 /**
  * Set default values in case they were not provided
@@ -58,7 +57,8 @@ environment = environment || 'staging'
 image = image || 'api'
 noCache = noCache ? '--no-cache' : ''
 prefix = prefix || 'default'
-const imageTag = `${prefix}/${environment}/${image}`
+const imageTag = `${prefix}/${environment}/${image}:latest`
+const repository = `${accountId}.dkr.ecr.us-east-1.amazonaws.com/${environment}/${image}:latest`
 
 /**
  * Execute a bash command and return the buffered response
@@ -174,7 +174,6 @@ const createTmpAwsCredentials = () => {
 // Build the docker image
 const buildDockerImage = () => {
   console.log(colors.green('~> Building docker image'))
-  repository = `${accountId}.dkr.ecr.us-east-1.amazonaws.com/${environment}/${image}`
   const buildCmd = `docker build -t ${imageTag} --build-arg AWS_ACCESS_KEY_ID=${accessKeyId} --build-arg AWS_SECRET_ACCESS_KEY=${secretAccessKey} --build-arg AWS_SESSION_TOKEN=${sessionToken} --build-arg ENVIRONMENT=${environment} -f ${dockerfile} ${noCache}`
   console.log(buildCmd)
   shell('docker', [
