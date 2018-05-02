@@ -177,18 +177,16 @@ const createTmpAwsCredentials = () => {
 // Get the next image tag
 const getNextImageTagVersion = () => {
   console.log(colors.green('~> Generating docker image tag'))
-  command(`aws ecr list-images --repository-name ${environment}/${image}`)
+  command(
+    `aws ecr list-images --repository-name ${environment}/${image} --filter '{"tagStatus": "TAGGED"}'`
+  )
     .then(({ stderr, stdout }) => {
       if (!isEmpty(stderr)) return console.log(colors.red(stderr))
 
       const { imageIds } = JSON.parse(stdout)
       const currentImageTagVersion = imageIds
         .map(
-          img =>
-            typeof img.imageTag === 'undefined' ||
-            Number(img.imageTag) !== 'number'
-              ? 0
-              : Number(img.imageTag)
+          img => (Number.isNaN(Number(img.imageTag)) ? 0 : Number(img.imageTag))
         )
         .reduce((max, cur) => Math.max(max, cur))
 
@@ -198,7 +196,7 @@ const getNextImageTagVersion = () => {
         imageTag = currentImageTagVersion + 1
       }
 
-      // console.log(colors.yellow(`Using image tag version: ${imageTag}\n`))
+      console.log(colors.yellow(`Using image tag version: ${imageTag}\n`))
       gen.next()
     })
     .catch(err => console.log(colors.red(err)))
