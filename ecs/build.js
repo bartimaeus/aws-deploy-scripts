@@ -48,6 +48,7 @@ let currentAccountId
 let accessKeyId
 let secretAccessKey
 let sessionToken
+let imageTag
 
 /**
  * Set default values in case they were not provided
@@ -57,8 +58,8 @@ environment = environment || 'staging'
 image = image || 'api'
 noCache = noCache ? '--no-cache' : ''
 prefix = prefix || 'default'
-const imageTag = `${prefix}/${environment}/${image}:latest`
-const repository = `${accountId}.dkr.ecr.us-east-1.amazonaws.com/${environment}/${image}:latest`
+const imageName = `${prefix}/${environment}/${image}`
+const repository = `${accountId}.dkr.ecr.us-east-1.amazonaws.com/${environment}/${image}`
 
 /**
  * Execute a bash command and return the buffered response
@@ -171,6 +172,17 @@ const createTmpAwsCredentials = () => {
     .catch(err => console.log(colors.red(err)))
 }
 
+const getNextImageTagVersion = () => {
+  console.log(colors.green('~> Generating docker image tag'))
+  command(`aws ecr list-images --repository-name ${imageTag}`)
+    .then(({ stderr, stdout }) => {
+      JSON.parse(stdout).map(image => {
+        console.log(colors.cyan('imageTag = image.imageTag'))
+      })
+    })
+    .catch(err => console.log(colors.red(err)))
+}
+
 // Build the docker image
 const buildDockerImage = () => {
   console.log(colors.green('~> Building docker image'))
@@ -233,6 +245,7 @@ function* build() {
   yield signInToAwsEcr()
   yield getAwsAccountId()
   yield createTmpAwsCredentials()
+  yield getNextImageTagVersion()
   yield buildDockerImage()
   yield tagDockerImage()
   if (push) {
