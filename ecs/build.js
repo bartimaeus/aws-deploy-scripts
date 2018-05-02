@@ -192,7 +192,7 @@ const getNextImageTagVersion = () => {
         )
         .reduce((max, cur) => Math.max(max, cur))
 
-      if (isNaN(currentImageTagVersion)) {
+      if (Number.isNaN(currentImageTagVersion)) {
         imageTag = 1
       } else {
         imageTag = currentImageTagVersion + 1
