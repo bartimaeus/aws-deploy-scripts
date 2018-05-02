@@ -13,7 +13,7 @@
   ],
   "bin": {
     "aws-ecs-build": "./ecs/build.js",
-    "aws-ecs-deploy": "./ecs/deploy.sh",
+    "aws-ecs-deploy": "./ecs/deploy.js",
     "aws-parameter-store": "./ec2/parameter-store.js",
     "aws-s3-deploy": "./s3/deploy.sh",
     "aws-s3-secrets": "./s3/secrets.js"
@@ -21,6 +21,7 @@
   "dependencies": {
     "colors": "^1.2.3",
     "commander": "^2.15.1",
+    "inquirer": "^5.2.0",
     "lodash": "^4.17.10",
     "touch": "^3.1.0"
   },

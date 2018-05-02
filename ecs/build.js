@@ -36,19 +36,20 @@ program
     '-p, --prefix [value]',
     'Project prefix for tagging the build locally.'
   )
+  .option('-t, --tag [value]', 'Docker image tag to use for this build.')
   .option('--push', 'Automatically push the docker image')
   .option('--noCache', 'Build the docker image fresh and not from cache')
   .parse(process.argv)
 
-const { accountId, push } = program
+const { accountId, push, tag } = program
 
 let gen // Set a variable for our generator
 let { dockerfile, environment, image, noCache, prefix } = program
-let currentAccountId
 let accessKeyId
+let currentAccountId
+let imageTag
 let secretAccessKey
 let sessionToken
-let imageTag
 
 /**
  * Set default values in case they were not provided
@@ -56,6 +57,7 @@ let imageTag
 dockerfile = dockerfile || 'Dockerfile'
 environment = environment || 'staging'
 image = image || 'api'
+imageTag = tag || null
 noCache = noCache ? '--no-cache' : ''
 prefix = prefix || 'default'
 const imageName = `${prefix}/${environment}/${image}`
@@ -172,26 +174,47 @@ const createTmpAwsCredentials = () => {
     .catch(err => console.log(colors.red(err)))
 }
 
+// Get the next image tag
 const getNextImageTagVersion = () => {
   console.log(colors.green('~> Generating docker image tag'))
-  command(`aws ecr list-images --repository-name ${imageTag}`)
+  command(`aws ecr list-images --repository-name ${environment}/${image}`)
     .then(({ stderr, stdout }) => {
-      JSON.parse(stdout).map(image => {
-        console.log(colors.cyan('imageTag = image.imageTag'))
-      })
+      if (!isEmpty(stderr)) return console.log(colors.red(stderr))
+
+      const { imageIds } = JSON.parse(stdout)
+      const currentImageTagVersion = imageIds
+        .map(
+          img =>
+            typeof img.imageTag === 'undefined' ||
+            typeof img.imageTag === 'string'
+              ? 0
+              : img.imageTag
+        )
+        .reduce((max, cur) => Math.max(max, cur))
+
+      if (isNaN(currentImageTagVersion)) {
+        imageTag = 1
+      } else {
+        imageTag = currentImageTagVersion + 1
+      }
+
+      // console.log(colors.yellow(`Using image tag version: ${imageTag}\n`))
+      gen.next()
     })
     .catch(err => console.log(colors.red(err)))
 }
 
 // Build the docker image
 const buildDockerImage = () => {
-  console.log(colors.green('~> Building docker image'))
-  const buildCmd = `docker build -t ${imageTag} --build-arg AWS_ACCESS_KEY_ID=${accessKeyId} --build-arg AWS_SECRET_ACCESS_KEY=${secretAccessKey} --build-arg AWS_SESSION_TOKEN=${sessionToken} --build-arg ENVIRONMENT=${environment} -f ${dockerfile} ${noCache}`
-  console.log(buildCmd)
+  console.log(colors.green(`~> Building docker image ${imageName}:${imageTag}`))
+  const buildCmd = `docker build -t ${imageName}:latest -t ${imageName}:${imageTag} --build-arg AWS_ACCESS_KEY_ID=${accessKeyId} --build-arg AWS_SECRET_ACCESS_KEY=${secretAccessKey} --build-arg AWS_SESSION_TOKEN=${sessionToken} --build-arg ENVIRONMENT=${environment} -f ${dockerfile} ${noCache}`
+  console.log(colors.cyan(`Running: ${buildCmd}`))
   shell('docker', [
     'build',
     '-t',
-    imageTag,
+    `${imageName}:latest`,
+    '-t',
+    `${imageName}:${imageTag}`,
     '--build-arg',
     `AWS_ACCESS_KEY_ID=${accessKeyId}`,
     '--build-arg',
@@ -203,7 +226,7 @@ const buildDockerImage = () => {
     '-f',
     dockerfile,
     '.',
-    '--no-cache',
+    noCache,
   ])
     .then(({ code }) => {
       if (code === 0) {
@@ -216,11 +239,23 @@ const buildDockerImage = () => {
 }
 
 const tagDockerImage = () => {
-  console.log(colors.green('~> Tagging docker image'))
-  shell('docker', ['tag', imageTag, repository])
+  console.log(
+    colors.green(
+      `~> Tagging docker image: ${imageName}:${imageTag} ${repository}:${imageTag}`
+    )
+  )
+  shell('docker', [
+    'tag',
+    `${imageName}:${imageTag}`,
+    `${repository}:${imageTag}`,
+  ])
     .then(({ code }) => {
       if (code === 0) {
-        console.log(colors.yellow('Successfully tagged docker image.\n'))
+        console.log(
+          colors.yellow(
+            `Successfully tagged docker image with version: ${imageTag}\n`
+          )
+        )
         return gen.next()
       }
       console.log(colors.red(`Tag failed with error code: ${code}`))
@@ -230,11 +265,15 @@ const tagDockerImage = () => {
 
 const pushDockerImage = () => {
   console.log(colors.green('~> Pushing docker image'))
-  shell('docker', ['push', repository])
+  shell('docker', ['push', `${repository}:${imageTag}`])
     .then(({ code }) => {
       if (code === 0) {
-        console.log(colors.yellow('Successfully pushed docker image.\n'))
-        return
+        console.log(
+          colors.yellow(
+            `Successfully pushed docker image: ${repository}:${imageTag}.\n`
+          )
+        )
+        return gen.next()
       }
       console.log(colors.red(`Push failed with error code: ${code}`))
     })
@@ -245,7 +284,9 @@ function* build() {
   yield signInToAwsEcr()
   yield getAwsAccountId()
   yield createTmpAwsCredentials()
-  yield getNextImageTagVersion()
+  if (isEmpty(imageTag)) {
+    yield getNextImageTagVersion()
+  }
   yield buildDockerImage()
   yield tagDockerImage()
   if (push) {
