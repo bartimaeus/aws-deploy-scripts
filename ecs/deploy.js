@@ -26,6 +26,10 @@ program
   )
   .option('-n, --service-name [value]', 'Name of the service to deploy')
   .option(
+    '-o, --timeout',
+    'Timeout in milliseconds to wait for the deploy before halting the deployment. Defaults to 300 milliseconds'
+  )
+  .option(
     '-r, --region [value]',
     'AWS Region where ECS and ECR are currently in use.'
   )
@@ -38,7 +42,7 @@ program
 const { accountId, cluster, serviceName, tag, taskDefinition } = program
 
 let gen // Set a variable for our generator
-let { image, region } = program
+let { image, region, timeout } = program
 let currentAccountId
 let imageTag
 
@@ -48,6 +52,7 @@ let imageTag
 image = image || 'api'
 imageTag = tag || null
 region = region || 'us-east-1'
+timeout = timeout || 300
 
 /**
  * Execute a bash command and return the buffered response
@@ -171,7 +176,7 @@ const getImageTagVersion = () => {
 }
 
 const deployService = () => {
-  const deployCmd = `ecs-deploy --cluster ${cluster} --service-name ${serviceName} --image ${accountId}.dkr.ecr.${region}.amazonaws.com/${image}:${imageTag} --timeout 500`
+  const deployCmd = `ecs-deploy --cluster ${cluster} --service-name ${serviceName} --image ${accountId}.dkr.ecr.${region}.amazonaws.com/${image}:${imageTag} --timeout ${timeout}`
   console.log(colors.green(`Running: ${deployCmd}`))
   shell(`${__dirname}/ecs-deploy.sh`, [
     '--cluster',
@@ -181,7 +186,7 @@ const deployService = () => {
     '--image',
     `${accountId}.dkr.ecr.${region}.amazonaws.com/${image}:${imageTag}`,
     '--timeout',
-    500,
+    timeout,
   ])
     .then(({ code }) => {
       if (code === 0) {
@@ -194,7 +199,7 @@ const deployService = () => {
 }
 
 const deployTask = () => {
-  const deployCmd = `ecs-deploy --cluster ${cluster} --task-definition ${taskDefinition} --image ${accountId}.dkr.ecr.${region}.amazonaws.com/${image}:${imageTag} --timeout 500`
+  const deployCmd = `ecs-deploy --cluster ${cluster} --task-definition ${taskDefinition} --image ${accountId}.dkr.ecr.${region}.amazonaws.com/${image}:${imageTag} --timeout ${timeout}`
   console.log(colors.green(`Running: ${deployCmd}`))
   shell(`${__dirname}/ecs-deploy.sh`, [
     '--cluster',
@@ -204,7 +209,7 @@ const deployTask = () => {
     '--image',
     `${accountId}.dkr.ecr.${region}.amazonaws.com/${image}:${imageTag}`,
     '--timeout',
-    500,
+    timeout,
   ])
     .then(({ code }) => {
       if (code === 0) {
