@@ -186,9 +186,9 @@ const getNextImageTagVersion = () => {
         .map(
           img =>
             typeof img.imageTag === 'undefined' ||
-            typeof img.imageTag === 'string'
+            Number(img.imageTag) !== 'number'
               ? 0
-              : img.imageTag
+              : Number(img.imageTag)
         )
         .reduce((max, cur) => Math.max(max, cur))
 
