@@ -147,16 +147,14 @@ const getAwsAccountId = () => {
 
 const getImageTagVersion = () => {
   console.log(colors.green('~> Listing image tags/versions'))
-  command(`aws ecr list-images --repository-name ${image}`)
+  command(
+    `aws ecr list-images --repository-name ${image} --filter '{"tagStatus": "TAGGED"}'`
+  )
     .then(({ stderr, stdout }) => {
       if (!isEmpty(stderr)) return console.log(colors.red(stderr))
 
       const { imageIds } = JSON.parse(stdout)
-      const tags = compact(
-        imageIds.map(
-          img => (typeof img.imageTag === 'undefined' ? null : img.imageTag)
-        )
-      )
+      const tags = compact(imageIds.map(img => img.imageTag))
 
       inquirer
         .prompt({
@@ -167,7 +165,8 @@ const getImageTagVersion = () => {
         })
         .then(answers => {
           imageTag = answers.tag
-          console.log(colors.yellow(`Selected version ${imageTag} to deploy\n`))
+          console.log('')
+          // console.log(colors.yellow(`Selected version ${imageTag} to deploy\n`))
           gen.next()
         })
         .catch(err => console.log(colors.red(err)))
