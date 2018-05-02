@@ -234,7 +234,7 @@ The script concept comes from [How to Manage Secrets for Amazon EC2 Container Se
 
 3. Install `aws-deploy-scripts` in your project--if not already installed
 
-    yarn add aws-deploy-scripts --dev
+        yarn add aws-deploy-scripts --dev
 
 4. Add `env-vars` and `get-env-vars` scripts to your `package.json`
 
@@ -247,10 +247,10 @@ The script concept comes from [How to Manage Secrets for Amazon EC2 Container Se
     ```
 5. Send your local secrets file to S3 (NOTE: if you used the VPC policy on your s3 bucket, then you'll need to connect to the VPN before you can send your secret file)
 
-    yarn env-vars
+        yarn env-vars
 
 6. Testing the file on S3 requires you to download the file
 
-    yarn get-env-vars
+        yarn get-env-vars
 
   I've added prefix of `s3.` to the file being downloaded so that it doesn't overwrite your original file.
