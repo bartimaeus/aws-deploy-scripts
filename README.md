@@ -45,9 +45,9 @@ This repository is for my sanity in managing multiple AWS accounts on the same m
 
 There are three ways to keep track of build versions when using `aws-ecs-build`
 
-1. Don't supply a build tag in which case we determine the next build number based on the last build id pushed to ECR
+1. Don't supply a build tag in which case we determine the next build number based on the last build pushed to ECR
 
-2. Create a `.buildversion` file in your project home directory (wherever to call `aws-ecs-build` from) and we'll keep track of the current build version in that file
+2. Create a `.buildversion` file in your project home directory (or wherever you call `aws-ecs-build` from) and we'll keep track of the current build version in that file
 
         # .buildversion
         staging/nginx:237
