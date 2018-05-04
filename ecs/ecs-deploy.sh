@@ -269,6 +269,11 @@ function getCurrentTaskDefinition() {
       TASK_DEFINITION_ARN=`$AWS_ECS describe-services --services $SERVICE --cluster $CLUSTER | jq -r .services[0].taskDefinition`
       TASK_DEFINITION=`$AWS_ECS describe-task-definition --task-def $TASK_DEFINITION_ARN`
     fi
+
+    if [ $SERVICE == false ] && [ $TASK_DEFINITION != false ]; then
+      TASK_DEFINITION_ARN=`$AWS_ECS describe-task-definition --task-def $TASK_DEFINITION | jq -r .taskDefinition.taskDefinitionArn`
+      TASK_DEFINITION=`$AWS_ECS describe-task-definition --task-def $TASK_DEFINITION_ARN`
+    fi
 }
 
 function createNewTaskDefJson() {
