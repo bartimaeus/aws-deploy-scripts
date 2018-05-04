@@ -39,7 +39,31 @@ This repository is for my sanity in managing multiple AWS accounts on the same m
         cd switcher
         npm install -g
 
+## ECS Build
+
+> aws-ecs-build --environment staging --image nginx --dockerfile services/nginx/Dockerfile --prefix company-identifier --account-id 12345678 --noCache
+
+There are three ways to keep track of build versions when using `aws-ecs-build`
+
+1. Don't supply a build tag in which case we determine the next build number based on the last build id pushed to ECR
+
+2. Create a `.buildversion` file in your project home directory (wherever to call `aws-ecs-build` from) and we'll keep track of the current build version in that file
+
+        # .buildversion
+        staging/nginx:237
+        production/nginx:233
+
+3. Specify a tag when calling `aws-ecs-build`
+
+        aws-ecs-build --environment staging --image nginx --dockerfile services/nginx/Dockerfile --tag 101 --prefix company-identifier --account-id 12345678 --noCache
+
+The current build tag that we support are basic auto-incrementing integers. The integer tag numbers allow us to quickly deploy/rollback to a working build version from the command line.
+
+You can also *push* your build to ECR by adding `--push` to the `aws-ecs-build` command.
+
 ## S3 Deploy
+
+> aws-s3-deploy
 
 Back in the day I used [gulp and grunt scripts](yeoman-s3-example) to sync assets with S3 for a number of static websites I manage.
 

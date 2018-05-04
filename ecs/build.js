@@ -9,7 +9,8 @@
 const colors = require('colors')
 const program = require('commander')
 const { exec, spawn } = require('child_process')
-const { isEmpty } = require('lodash')
+const { isEmpty, isNumber } = require('lodash')
+const fs = require('fs')
 
 /**
  * Setup parameters from command line arguments
@@ -47,6 +48,7 @@ let gen // Set a variable for our generator
 let { dockerfile, environment, image, noCache, prefix } = program
 let accessKeyId
 let currentAccountId
+let currentBuildVersion
 let imageTag
 let secretAccessKey
 let sessionToken
@@ -60,6 +62,7 @@ image = image || 'api'
 imageTag = tag || null
 noCache = noCache ? '--no-cache' : ''
 prefix = prefix || 'default'
+let buildVersionExists = false
 const imageName = `${prefix}/${environment}/${image}`
 const repository = `${accountId}.dkr.ecr.us-east-1.amazonaws.com/${environment}/${image}`
 
@@ -174,9 +177,77 @@ const createTmpAwsCredentials = () => {
     .catch(err => console.log(colors.red(err)))
 }
 
-// Get the next image tag
-const getNextImageTagVersion = () => {
-  console.log(colors.green('~> Generating docker image tag'))
+// Generate the next image tag based on the .buildversion file previous version for the current image
+const generateNextImageTagFromFile = () => {
+  console.log(
+    colors.green('~> Checking .buildversion for previous build version')
+  )
+  fs.readFile('.buildversion', 'utf8', (err, data) => {
+    if (err) {
+      console.log(
+        colors.magenta(
+          'Could not find .buildversion in your project directory.\n'
+        )
+      )
+      return gen.next()
+    }
+
+    // .buildversion is empty; create a version
+    if (isEmpty(data)) {
+      imageTag = 1
+      console.log(colors.yellow(`Using image tag version: ${imageTag}\n`))
+      return gen.next()
+    }
+
+    try {
+      data
+        .toString()
+        .trim()
+        .split('\n')
+        .forEach(line => {
+          if (line === '') return
+
+          // Split on ':' and then remove any spaces
+          //
+          // line => staging/service:204
+          //
+          // [0] === 'staging/service' // build image name
+          // [1] === 204               // previous build version
+          const [key, value] = line
+            .split(':')
+            .map(buildImage => buildImage.replace(' ', ''))
+
+          if (key === `${environment}/${image}`) {
+            currentBuildVersion = line
+            buildVersionExists = true
+            imageTag = Number(value) + 1
+          }
+        })
+
+      // Return next build imageTag
+      if (isNumber(imageTag)) {
+        console.log(colors.yellow(`Using image tag version: ${imageTag}\n`))
+        return gen.next()
+      }
+
+      // Image not found in .buildversion
+      imageTag = 1
+      console.log(colors.yellow(`Using image tag version: ${imageTag}\n`))
+      gen.next()
+    } catch (error) {
+      console.log(colors.red(`${error}\n`))
+      gen.next()
+    }
+  })
+}
+
+// Generate the next image tag based on the previous build tags on ECR
+const generateNextImageTagFromPreviousBuilds = () => {
+  console.log(
+    colors.green(
+      '~> Generating docker image tag based on previous builds on ECR'
+    )
+  )
   command(
     `aws ecr list-images --repository-name ${environment}/${image} --filter '{"tagStatus": "TAGGED"}'`
   )
@@ -261,6 +332,46 @@ const tagDockerImage = () => {
     .catch(err => console.log(colors.red(err)))
 }
 
+const saveBuildVersion = () => {
+  console.log(colors.green('Saving build version to .buildversion'))
+  if (buildVersionExists) {
+    fs.readFile('.buildversion', 'utf8', (err, content) => {
+      if (err) {
+        return console.log(colors.red(`${err}\n`))
+      }
+      const result = content.replace(
+        currentBuildVersion,
+        `${environment}/${image}:${imageTag}`
+      )
+
+      fs.writeFile('.buildversion', result, 'utf8', writeErr => {
+        if (writeErr) {
+          return console.log(colors.red(`${writeErr}\n`))
+        }
+        console.log(
+          colors.yellow(`Updated ${environment}/${image}:${imageTag}.\n`)
+        )
+        gen.next()
+      })
+    })
+  } else {
+    fs.appendFile(
+      '.buildversion',
+      `${environment}/${image}:${imageTag}\n`,
+      'utf8',
+      err => {
+        if (err) {
+          return console.log(colors.red(`${err}\n`))
+        }
+        console.log(
+          colors.yellow(`Added ${environment}/${image}:${imageTag}.\n`)
+        )
+        gen.next()
+      }
+    )
+  }
+}
+
 const pushDockerImage = () => {
   console.log(colors.green('~> Pushing docker image'))
   shell('docker', ['push', `${repository}:${imageTag}`])
@@ -282,11 +393,21 @@ function* build() {
   yield signInToAwsEcr()
   yield getAwsAccountId()
   yield createTmpAwsCredentials()
-  if (isEmpty(imageTag)) {
-    yield getNextImageTagVersion()
+
+  // Generate the next image tag using the .buildversion file
+  if (isEmpty(imageTag) && !isNumber(imageTag)) {
+    yield generateNextImageTagFromFile()
   }
+
+  // Generate the next image tag based on the previous build tags
+  if (isEmpty(imageTag) && !isNumber(imageTag)) {
+    yield generateNextImageTagFromPreviousBuilds()
+  }
+
   yield buildDockerImage()
   yield tagDockerImage()
+  yield saveBuildVersion()
+
   if (push) {
     yield pushDockerImage()
   }
