@@ -61,6 +61,8 @@ The current build tag that we support are basic auto-incrementing integers. The 
 
 You can also *push* your build to ECR by adding `--push` to the `aws-ecs-build` command.
 
+> aws-ecs-build --environment staging --image nginx --dockerfile services/nginx/Dockerfile --prefix company-identifier --account-id 12345678 --noCache --push
+
 ## S3 Deploy
 
 > aws-s3-deploy
